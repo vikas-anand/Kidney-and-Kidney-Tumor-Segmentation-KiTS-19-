@@ -71,42 +71,18 @@ if __name__ == '__main__':
             # mask_path = test_mask_path+'/'+j+'_slice_'+str(i)+'.nii.gz' 
             im = nib.load(img_path).get_data()            
             img = np.clip(im, 20,190)
-            img1 = (img-np.min(img))/(np.max(img)-np.min(img))
+            norm_img = (img-np.min(img))/(np.max(img)-np.min(img))
             # img1 = (img-np.mean(img))/(np.std(img))
-            image[:,:,0] =img1
-            image[:,:,1] =img1
-            image[:,:,2] =img1               
-            # GT =  nib.load(mask_path).get_data()
-            # mask = get_one_hot(GT)
-
+            image[:,:,0] = norm_img
+            image[:,:,1] = norm_img
+            image[:,:,2] = norm_img          
+            
         ### Enable this line of code for prediction######    
              
             pred = model.predict(image[None,...], batch_size=1, verbose=0, steps=None)
             pred = pred[0]
             pred1 = np.argmax(pred, axis = 2)
-            # pred[pred==0.9961] = 1
-           
-
-
             prediction[i,:,:] = pred1
-
-
-
-        
-            # imshow(im,img, img1, GT,pred1,
-            #     mask[:,:,0],pred[:,:,0],
-            #     mask[:,:,1],pred[:,:,1],
-            #     mask[:,:,2],pred[:,:,2],
-            #     title=['Input_Image','Clipped Image','STD_Image','Ground_Truth','Predicted_label',
-            #     'Grount_Truth_BG', 'Predicted_label_BG',         
-            #     'Grount_Truth_Kidney', 'Predicted_label_Kidney', 
-            #     'Grount_Truth_Tumor', 'Predicted_label_Tumor'])
-                
-            # imshow(im,GT, pred1,            
-            #     title=['Input_Image','Ground_Truth','Predicted_label'])
-            
-            # plt.savefig(models_prediction+j+'_slice_'+str(i)+'.png')
-            # plt.close()
         pred_vol = nib.Nifti1Image(prediction, case_affine)
         pred_vol.set_data_dtype(np.int16)
         nib.save(pred_vol,vol_prediction+'prediction'+j[-6:]+'.nii.gz')
